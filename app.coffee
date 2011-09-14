@@ -41,7 +41,7 @@ class Job extends mojo.Template
     console.log 'perform'
     Bundle.findById id, (err, bundle) =>
       bundle.status = 'building'
-      bundle.save ->
+      bundle.save =>
 
       proc = spawn './bundle.sh', [ process.env.PWD, id, source ]
 
@@ -50,7 +50,7 @@ class Job extends mojo.Template
 
       proc.on 'exit', (code) =>
         bundle.status = code == 0 and 'complete' or 'failed'
-        bundle.save -> @complete()
+        bundle.save => @complete()
 
 
 # ---------------------------------------------------------------------------
