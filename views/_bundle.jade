@@ -11,4 +11,18 @@
   #source= bundle._doc.source
     time(class="timeago",datetime=bundle.iso8601())= bundle.iso8601()
 
-  #status= 'status: ' + bundle._doc.status
+  #instructions
+    - if (bundle.get('status') === 'complete')
+      - var parts = bundle.get('source').split('/'), name = parts[parts.length - 1].replace(/.git$/, '');
+      h2 The bundle is ready for use
+      pre
+        | curl -O http://bundler.caurea.org/bundle/#{bundle._id}/download
+        | git clone #{bundle._id}.bundle #{name}
+        | cd #{name}
+        | git remote set-url origin #{bundle.get('source')}
+        | git pull
+        | rm ../#{bundle._id}.bundle
+    - else if (bundle.get('status') === 'failed')
+      h2 Failed to create the bundle
+    - else
+      h2 We are busy creating the bundle

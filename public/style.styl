@@ -142,13 +142,37 @@ form
       span
         padding: 0 3px
 
-  #source, #status
-    padding-left: 10px;
+  #source
+    font-weight: 100
 
   .timeago
     padding-top: 1px
     float: right
     font-size: 12px
+
+  #instructions
+    margin: 10px auto 0
+
+    h2
+      font-size 18px
+      font-weight: 300
+      text-align: center
+      margin: 20px 0 5px
+      text-decoration underline
+
+    pre
+      zero-box()
+      padding: 10px;
+
+      border: 1px solid #CACACA;
+      border-radius 3px
+
+      line-height: 1.2em;
+      font: 12px Monaco, "Courier New", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", monospace;
+      overflow: auto;
+      background-clip: padding-box;
+      background-color: white;
+      color: #393939;
 
 footer
   display: block;
