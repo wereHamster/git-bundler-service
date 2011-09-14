@@ -17,6 +17,11 @@ html
     #container
       h1#title
         a(href='/') git bundler service
+
+        #flattr
+          a.FlattrButton(style="display:none;",rev="flattr;button:compact;",href="http://bundler.caurea.org")
+            img(src="http://api.flattr.com/button/flattr-badge-large.png",alt="Flattr this",title="Flattr this",border="0")
+
       #content!= body
       footer
         p &copy; Tomas 'wereHamster' Carnecky
@@ -34,3 +39,4 @@ html
             a(href="http://expressjs.com/") Express
 
     != partial('gauges')
+    != partial('flattr')
