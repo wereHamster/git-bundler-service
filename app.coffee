@@ -2,6 +2,15 @@
 { spawn } = require 'child_process'
 String::trim = -> this.replace /^\s+|\s+$/g, ''
 
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+
+# How long the bundles are cached (in milliseconds)
+TIMEOUT = 7 * 24 * 60 * 60 * 1000
+
+
 # ---------------------------------------------------------------------------
 # Mongoose
 # ---------------------------------------------------------------------------
@@ -86,7 +95,7 @@ createBundle = (source, fn) ->
   Bundle.where('source', source).where('status').in(['complete', 'building']).desc('timestamp').limit(1).exec (err, bundles) ->
     if err
       fn(err);
-    else if (bundles and bundles[0] and bundles[0].timestamp > new Date(Date.now() - 3600 * 1000))
+    else if (bundles and bundles[0] and bundles[0].timestamp > new Date(Date.now() - TIMEOUT))
       fn(null, bundles[0])
     else
       bundle = new Bundle({ source: source, status: 'queued' })
