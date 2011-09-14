@@ -1,7 +1,5 @@
 
 { spawn } = require 'child_process'
-{ createReadStream } = require('fs')
-
 
 # ---------------------------------------------------------------------------
 # Mongoose
@@ -15,8 +13,8 @@ BundleSchema = new mongoose.Schema({
   status: { type: String }
 })
 
-BundleSchema.methods.readStream = ->
-  createReadStream(process.env.PWD + '/data/bundles/' + this._id + '/bundle')
+BundleSchema.methods.bundlePath = ->
+  process.env.PWD + '/data/bundles/' + this._id + '/bundle'
 
 mongoose.model('Bundle', BundleSchema);
 Bundle = mongoose.model('Bundle');
@@ -100,8 +98,7 @@ app.get '/v1/bundle/:bundle', (req, res) ->
     when 'failed'
       res.send(500)
     when 'complete'
-      res.contentType('application/octet-stream');
-      req.bundle.readStream().pipe(res);
+      res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
     else
       res.send(204)
 
