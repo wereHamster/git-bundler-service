@@ -16,7 +16,7 @@
       - var parts = bundle.get('source').split('/'), name = parts[parts.length - 1].replace(/.git$/, '');
       h2 The bundle is ready for use
       pre
-        | curl -O http://bundler.caurea.org/bundle/#{bundle._id}/download
+        | curl -OJ https://bundler.caurea.org/bundle/#{bundle._id}/download
         | git clone #{bundle._id}.bundle #{name}
         | cd #{name}
         | git remote set-url origin #{bundle.get('source')}
