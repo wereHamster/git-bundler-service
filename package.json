@@ -3,9 +3,8 @@
   "name": "bundler.caurea.org",
 
   "dependencies": {
-    "coffee-script": "1.1.x",
-    "express": "2.4.x",
-    "mojo": "0.0.x",
-    "mongoose": "2.1.x"
+    "coffee-script": "1.1.x", "express": "2.4.x",
+    "mongoose": "2.1.x", "mojo": "0.0.x",
+    "jade": "0.15.x", "stylus": "0.15.x"
   }
 }

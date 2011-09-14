@@ -1,0 +1,36 @@
+
+p.intro
+  | Git does not support resumable clones. That feature, it turns out, is
+  | pretty tricky to implement properly. One workaround is to download a
+  | bundle over http and then fetch the remaining bits and pieces with git.
+
+p.intro
+  | But many repository admins do not provide bundles for you to download.
+  | This service aims to fill that gap: give us the URL to a repository and
+  | we'll create a bundle which you can download through http.
+
+form(action='/bundle',method='post')
+  input(type='text',name='source')
+  button.minibutton create bundle
+
+#result
+
+script
+  $(function() {
+    var $form = $('form'), $input = $form.find('input'), $button = $form.find('button');
+    $button.click(function(ev) {
+      var $result = $('#result').empty().hide();
+
+      $form.removeClass('error');
+      ev.preventDefault();
+
+      var source = $input.val();
+      if (source.length < 10) {
+        return $form.addClass('error')
+      }
+
+      $.post('/bundle', { source: source }, function(data) {
+        $result.html(data).fadeIn().find('time.timeago').timeago();
+      });
+    });
+  });

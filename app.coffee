@@ -1,5 +1,6 @@
 
 { spawn } = require 'child_process'
+String::trim = -> this.replace /^\s+|\s+$/g, ''
 
 # ---------------------------------------------------------------------------
 # Mongoose
@@ -16,6 +17,13 @@ BundleSchema = new mongoose.Schema({
 BundleSchema.methods.bundlePath = ->
   process.env.PWD + '/data/bundles/' + this._id + '/bundle'
 
+BundleSchema.methods.iso8601 = ->
+  d = this.timestamp
+  pad = (n) -> n < 10 and '0'+n or n
+  date = [d.getUTCFullYear(), pad(d.getUTCMonth()+1), pad(d.getUTCDate())].join '-'
+  time = [pad(d.getUTCHours()), pad(d.getUTCMinutes()), pad(d.getUTCSeconds())].join ':'
+  return "#{date}T#{time}Z"
+
 mongoose.model('Bundle', BundleSchema);
 Bundle = mongoose.model('Bundle');
 
@@ -30,17 +38,19 @@ mojoConnection = new mojo.Connection db: 'bundler'
 class Job extends mojo.Template
 
   perform: (id, source) ->
+    console.log 'perform'
     Bundle.findById id, (err, bundle) =>
       bundle.status = 'building'
       bundle.save ->
 
       proc = spawn './bundle.sh', [ process.env.PWD, id, source ]
-      proc.on 'exit', (code) =>
-        bundle.status = code == 0 and 'complete' or 'failed'
-        bundle.save ->
-        @complete()
+
       proc.stdout.on 'data', (data) -> console.log '' + data
       proc.stderr.on 'data', (data) -> console.log '' + data
+
+      proc.on 'exit', (code) =>
+        bundle.status = code == 0 and 'complete' or 'failed'
+        bundle.save -> @complete()
 
 
 # ---------------------------------------------------------------------------
@@ -49,6 +59,8 @@ class Job extends mojo.Template
 
 express = require('express')
 app = express.createServer();
+app.set('view engine', 'jade');
+
 app.configure ->
   app.use(express.logger());
   app.use(express.static(__dirname + '/public'));
@@ -69,21 +81,47 @@ app.param 'bundle', (req, res, next, id) ->
     req.bundle = bundle; next();
 
 createBundle = (source, fn) ->
-  Bundle.where({ source: source }).desc('timestamp').limit(1).run (err, bundles) ->
+  source = source.trim()
+
+  Bundle.where('source', source).where('status').in(['complete', 'building']).desc('timestamp').limit(1).exec (err, bundles) ->
     if err
       fn(err);
-    else if (bundles and bundles[0] and bundles[0].timestamp > new Date(Date.now() - 3600))
+    else if (bundles and bundles[0] and bundles[0].timestamp > new Date(Date.now() - 3600 * 1000))
       fn(null, bundles[0])
     else
-      bundle = new Bundle({ source: source })
+      bundle = new Bundle({ source: source, status: 'queued' })
       bundle.save (err) ->
-        unless err
-          mojoConnection.enqueue Job.name, bundle._id, source, ->
-        fn(err, bundle)
+        if err?
+          fn(err)
+        else
+          mojoConnection.enqueue Job.name, '' + bundle._id, source, ->
+            fn(null, bundle)
 
 
 # ---------------------------------------------------------------------------
 # Here be the routes
+# ---------------------------------------------------------------------------
+
+app.get '/', (req, res) ->
+  res.render('index', { title: 'git bundler service' });
+
+app.post '/bundle', (req, res) ->
+  source = req.param('source')
+  if source and source.length > 10
+    createBundle source, (err, bundle) ->
+      res.partial('bundle', { bundle: bundle });
+  else
+    res.send(400)
+
+app.get '/bundle/:bundle', (req, res) ->
+  res.render('bundle', { title: 'git bundler service', bundle: req.bundle });
+
+app.get '/bundle/:bundle/download', (req, res) ->
+  res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
+
+
+# ---------------------------------------------------------------------------
+# API v1 (unsupported at the moment)
 # ---------------------------------------------------------------------------
 
 # POST /v1/bundle; params: source=<url>
@@ -103,6 +141,7 @@ app.get '/v1/bundle/:bundle', (req, res) ->
       res.send(204)
 
 app.listen(parseInt(process.env.PORT) || 3000)
+
 
 # ---------------------------------------------------------------------------
 # Worker

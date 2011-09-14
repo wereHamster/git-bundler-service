@@ -1,0 +1,14 @@
+
+#bundle(class=bundle._doc.status)
+
+  #name= 'Bundle ' + bundle._id
+    #links
+      a.permalink(href='/bundle/'+bundle._id) permalink
+      - if (bundle.get('status') === 'complete')
+        span |
+        a.download(href='/bundle/'+bundle._id+'/download') download
+
+  #source= bundle._doc.source
+    time(class="timeago",datetime=bundle.iso8601())= bundle.iso8601()
+
+  #status= 'status: ' + bundle._doc.status
