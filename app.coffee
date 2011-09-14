@@ -114,7 +114,7 @@ app.post '/bundle', (req, res) ->
     res.send(400)
 
 app.get '/bundle/:bundle', (req, res) ->
-  res.render('bundle', { title: 'git bundler service', bundle: req.bundle });
+  res.render('bundle', { title: "bundle #{req.bundle._id}", bundle: req.bundle });
 
 app.get '/bundle/:bundle/download', (req, res) ->
   res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
