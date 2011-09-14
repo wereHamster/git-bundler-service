@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 ROOT="$1/data/bundles/$2"
 
