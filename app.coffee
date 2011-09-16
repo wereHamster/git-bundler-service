@@ -78,6 +78,11 @@ app.configure ->
 app.configure 'development', ->
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 
+# Middleware
+countBundles = (req, res, next) ->
+  Bundle.count { 'status': 'complete' }, (err, count) ->
+    return next err if err
+    req.count = count; next()
 
 # Custom url params
 app.param 'bundle', (req, res, next, id) ->
@@ -111,8 +116,8 @@ createBundle = (source, fn) ->
 # Here be the routes
 # ---------------------------------------------------------------------------
 
-app.get '/', (req, res) ->
-  res.render('index', { title: 'git bundler service' });
+app.get '/', countBundles, (req, res) ->
+  res.render('index', { count: req.count, title: 'git bundler service' });
 
 app.post '/bundle', (req, res) ->
   source = req.param('source')
@@ -122,8 +127,8 @@ app.post '/bundle', (req, res) ->
   else
     res.send(400)
 
-app.get '/bundle/:bundle', (req, res) ->
-  res.render('bundle', { title: "bundle #{req.bundle._id}", bundle: req.bundle });
+app.get '/bundle/:bundle', countBundles, (req, res) ->
+  res.render('bundle', { count: req.count, title: "bundle #{req.bundle._id}", bundle: req.bundle });
 
 app.get '/bundle/:bundle/download', (req, res) ->
   res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
