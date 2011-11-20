@@ -1,10 +1,14 @@
 {
   "version": "1.0.0", "private": true,
-  "name": "bundler.caurea.org",
+  "name": "git-bundler-service",
 
   "dependencies": {
-    "coffee-script": "1.1.x", "express": "2.5.x",
-    "mongoose": "2.3.x", "mojo": "0.0.x",
-    "jade": "0.17.x", "stylus": "0.19.x"
+    "coffee-script":  "1.1.x",
+    "mongoose":       "2.3.x",
+    "express":        "2.5.x",
+    "stylus":         "0.19.x",
+    "jade":           "0.17.x",
+    "mojo":           "0.0.x",
+    "zion":           "0.0.x"
   }
 }
