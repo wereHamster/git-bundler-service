@@ -2,7 +2,7 @@
 { spawn } = require 'child_process'
 module.exports = (msg) ->
     if msg.cmd is 'zion:bootstrap'
-        process.send cmd: 'zion:fork'
+        process.send cmd: 'zion:fork'; process.exit 0
     else if msg.cmd is 'zion:fork'
         if msg.deploy
             spawn('deploy.sh', [ msg.deploy ]).on 'exit', (code) ->
