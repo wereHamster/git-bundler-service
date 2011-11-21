@@ -134,7 +134,8 @@ app.get '/bundle/:bundle/download', (req, res) ->
   res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
 
 app.post '/site/deploy', (req, res) ->
-  process.send cmd: 'zion:fork', deploy: req.body.after
+  if req.body.payload.ref is 'refs/heads/master' and req.body.payload.after?
+    process.send cmd: 'zion:fork', deploy: req.body.payload.after
   res.send 201
 
 
