@@ -8,7 +8,7 @@ module.exports = (msg) ->
     else if msg.cmd is 'zion:fork'
         if msg.deploy
             spawn('./deploy.sh', [ msg.deploy ]).on 'exit', (code) ->
-                process.send cmd: 'zion:restart' if code is 0
+                process.send(cmd: 'zion:restart') if code is 0
                 process.exit 0
         else
             require './app'
