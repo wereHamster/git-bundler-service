@@ -133,6 +133,10 @@ app.get '/bundle/:bundle', countBundles, (req, res) ->
 app.get '/bundle/:bundle/download', (req, res) ->
   res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
 
+app.post '/site/deploy', (req, res) ->
+  process.send cmd: 'zion:fork', deploy: req.body.after
+  res.send 201
+
 
 # ---------------------------------------------------------------------------
 # API v1 (unsupported at the moment)
