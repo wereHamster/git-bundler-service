@@ -24,7 +24,7 @@ BundleSchema = new mongoose.Schema({
 })
 
 BundleSchema.methods.bundlePath = ->
-  process.env.PWD + '/data/bundles/' + this._id + '/bundle'
+  __dirname + '/data/bundles/' + this._id + '/bundle'
 
 BundleSchema.methods.iso8601 = ->
   d = this.timestamp
@@ -52,7 +52,7 @@ class Job extends mojo.Template
       bundle.status = 'building'
       bundle.save =>
 
-      proc = spawn './bundle.sh', [ process.env.PWD, id, source ]
+      proc = spawn './bundle.sh', [ __dirname, id, source ]
 
       proc.stdout.on 'data', (data) -> console.log '' + data
       proc.stderr.on 'data', (data) -> console.log '' + data
