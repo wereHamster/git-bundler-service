@@ -10,4 +10,3 @@ module.exports = (msg) ->
                 process.exit 0
         else
             require './app'
-            process.exit 1
