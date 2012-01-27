@@ -3,6 +3,12 @@
 { spawn } = require 'child_process'
 String::trim = -> this.replace /^\s+|\s+$/g, ''
 
+humanReadableSize = (size) ->
+  suffix = [ 'bytes', 'KiB', 'MiB', 'GiB', 'TiB' ]
+  if (i = parseInt(Math.floor(Math.log(size) / Math.log(1024)))) is 0
+    (size / Math.pow(1024, i)) + ' ' + suffix[i];
+  else
+    (size / Math.pow(1024, i)).toFixed(1) + ' ' + suffix[i]
 
 
 # Global configuration options
@@ -35,12 +41,7 @@ BundleSchema.methods.iso8601 = ->
   return "#{date}T#{time}Z"
 
 BundleSchema.methods.humanReadableSize = ->
-  suffix = [ 'bytes', 'KiB', 'MiB' ]
-
-  if (i = parseInt(Math.floor(Math.log(@size) / Math.log(1024)))) is 0
-    (@size / Math.pow(1024, i)) + ' ' + suffix[i];
-  else
-    (@size / Math.pow(1024, i)).toFixed(1) + ' ' + suffix[i]
+  humanReadableSize @size
 
 mongoose.model('Bundle', BundleSchema);
 Bundle = mongoose.model('Bundle');
@@ -95,6 +96,16 @@ countBundles = (req, res, next) ->
     return next err if err
     req.count = count; next()
 
+totalBundleSize = (req, res, next) ->
+    reduce = (doc, prev) -> prev.size += doc.size || 0
+    Bundle.collection.group {}, {}, { size: 0 }, reduce, (err, docs) ->
+        if err or docs.length is 0
+            req.totalSize = 0
+        else
+            req.totalSize = docs[0].size
+
+        next()
+
 # Custom url params
 app.param 'bundle', (req, res, next, id) ->
   Bundle.findById id, (err, bundle) ->
@@ -127,8 +138,11 @@ createBundle = (source, fn) ->
 # Here be the routes
 # ------------------
 
-app.get '/', countBundles, (req, res) ->
-  res.render('index', { count: req.count, title: 'git bundler service' });
+app.get '/', countBundles, totalBundleSize, (req, res) ->
+  res.render 'index', {
+    title: 'git bundler service',
+    count: req.count, totalSize: humanReadableSize req.totalSize
+  }
 
 isValidSource = (source) ->
     source.length > 10 && source.match /^[a-zA-Z0-9-:/.]*$/
@@ -141,8 +155,11 @@ app.post '/bundle', (req, res) ->
   else
     res.send(400)
 
-app.get '/bundle/:bundle', countBundles, (req, res) ->
-  res.render('bundle', { count: req.count, title: "bundle #{req.bundle._id}", bundle: req.bundle });
+app.get '/bundle/:bundle', countBundles, totalBundleSize, (req, res) ->
+  res.render 'bundle', {
+    title: "bundle #{req.bundle._id}", bundle: req.bundle
+    count: req.count, totalSize: humanReadableSize req.totalSize
+  }
 
 app.get '/bundle/:bundle/download', (req, res) ->
   res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
