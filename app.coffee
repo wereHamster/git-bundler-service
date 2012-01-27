@@ -1,4 +1,5 @@
 
+{ statSync } = require 'fs'
 { spawn } = require 'child_process'
 String::trim = -> this.replace /^\s+|\s+$/g, ''
 
@@ -20,7 +21,7 @@ mongoose.connect('mongodb://localhost/bundler');
 
 BundleSchema = new mongoose.Schema({
   timestamp: { type: Date, required: true, default: Date.now }
-  status: { type: String }
+  status: { type: String }, size: { type: Number }
 })
 
 BundleSchema.methods.bundlePath = ->
@@ -58,6 +59,9 @@ class Job extends mojo.Template
 
       proc.on 'exit', (code) =>
         bundle.status = code == 0 and 'complete' or 'failed'
+        if bundle.status is 'complete'
+            bundle.size = statSync(bundle.bundlePath()).size
+
         bundle.save => @complete()
 
 
