@@ -142,26 +142,6 @@ app.post '/site/deploy', (req, res) ->
   res.send 201
 
 
-# ---------------------------------------------------------------------------
-# API v1 (unsupported at the moment)
-# ---------------------------------------------------------------------------
-
-# POST /v1/bundle; params: source=<url>
-app.post '/v1/bundle', (req, res) ->
-  # Create a new bundle and redirect the client to the bundle resource.
-  createBundle req.param('source'), (err, bundle) ->
-    res.redirect('/v1/bundle/' + bundle._id);
-
-# GET /v1/bundle/:bundle
-app.get '/v1/bundle/:bundle', (req, res) ->
-  switch req.bundle.status
-    when 'failed'
-      res.send(500)
-    when 'complete'
-      res.download(req.bundle.bundlePath(), "#{req.bundle._id}.bundle");
-    else
-      res.send(204)
-
 app.listen(parseInt(process.env.PORT) || 3000)
 
 
