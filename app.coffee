@@ -3,17 +3,17 @@
 String::trim = -> this.replace /^\s+|\s+$/g, ''
 
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
+
+# Global configuration options
+# ----------------------------
 
 # How long the bundles are cached (in milliseconds)
 TIMEOUT = 7 * 24 * 60 * 60 * 1000
 
 
-# ---------------------------------------------------------------------------
-# Mongoose
-# ---------------------------------------------------------------------------
+
+# Database stuff
+# --------------
 
 mongoose = require('mongoose')
 mongoose.connect('mongodb://localhost/bundler');
@@ -37,9 +37,9 @@ mongoose.model('Bundle', BundleSchema);
 Bundle = mongoose.model('Bundle');
 
 
-# ---------------------------------------------------------------------------
-# Mojo
-# ---------------------------------------------------------------------------
+
+# Background job templates
+# ------------------------
 
 mojo = require 'mojo'
 mojoConnection = new mojo.Connection db: 'bundler'
@@ -61,9 +61,9 @@ class Job extends mojo.Template
         bundle.save => @complete()
 
 
-# ---------------------------------------------------------------------------
-# Express
-# ---------------------------------------------------------------------------
+
+# Express setup
+# -------------
 
 express = require('express')
 app = express.createServer();
@@ -111,9 +111,9 @@ createBundle = (source, fn) ->
             fn(null, bundle)
 
 
-# ---------------------------------------------------------------------------
+
 # Here be the routes
-# ---------------------------------------------------------------------------
+# ------------------
 
 app.get '/', countBundles, (req, res) ->
   res.render('index', { count: req.count, title: 'git bundler service' });
@@ -142,11 +142,9 @@ app.post '/site/deploy', (req, res) ->
   res.send 201
 
 
-app.listen(parseInt(process.env.PORT) || 3000)
 
-
-# ---------------------------------------------------------------------------
-# Worker
-# ---------------------------------------------------------------------------
+# Start the web server and background worker
+# ------------------------------------------
 
 (new mojo.Worker mojoConnection, [ Job ]).poll()
+app.listen(parseInt(process.env.PORT) || 3000)
