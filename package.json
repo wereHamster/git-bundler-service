@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0", "private": true,
+  "version": "1.1.0", "private": true,
   "name": "git-bundler-service",
 
   "dependencies": {
-    "coffee-script":  "1.1.x",
-    "mongoose":       "2.3.x",
+    "coffee-script":  "1.2.x",
+    "mongoose":       "2.5.x",
     "express":        "2.5.x",
-    "stylus":         "0.19.x",
-    "jade":           "0.17.x",
+    "stylus":         "0.22.x",
+    "jade":           "0.20.x",
     "mojo":           "0.0.x",
     "zion":           "0.0.x"
   }
