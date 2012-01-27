@@ -47,7 +47,6 @@ mojoConnection = new mojo.Connection db: 'bundler'
 class Job extends mojo.Template
 
   perform: (id, source) ->
-    console.log 'perform'
     Bundle.findById id, (err, bundle) =>
       bundle.status = 'building'
       bundle.save =>
@@ -119,9 +118,12 @@ createBundle = (source, fn) ->
 app.get '/', countBundles, (req, res) ->
   res.render('index', { count: req.count, title: 'git bundler service' });
 
+isValidSource = (source) ->
+    source.length > 10 && source.match /^[a-zA-Z0-9-:/.]*$/
+
 app.post '/bundle', (req, res) ->
   source = req.param('source')
-  if source and source.length > 10
+  if isValidSource source
     createBundle source, (err, bundle) ->
       res.partial('bundle', { bundle: bundle });
   else
