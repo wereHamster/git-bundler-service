@@ -9,7 +9,10 @@
         a.download(href='/bundle/'+bundle._id+'/download') download
 
   #source= bundle._doc.source
-    time(class="timeago",datetime=bundle.iso8601())= bundle.iso8601()
+    .stats
+      time(class="timeago",datetime=bundle.iso8601())= bundle.iso8601()
+      - if (bundle.size)
+        span.size= ', ' + bundle.humanReadableSize()
 
   #instructions
     - if (bundle.get('status') === 'complete')

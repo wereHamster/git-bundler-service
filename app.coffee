@@ -34,6 +34,14 @@ BundleSchema.methods.iso8601 = ->
   time = [pad(d.getUTCHours()), pad(d.getUTCMinutes()), pad(d.getUTCSeconds())].join ':'
   return "#{date}T#{time}Z"
 
+BundleSchema.methods.humanReadableSize = ->
+  suffix = [ 'bytes', 'KiB', 'MiB' ]
+
+  if (i = parseInt(Math.floor(Math.log(@size) / Math.log(1024)))) is 0
+    (@size / Math.pow(1024, i)) + ' ' + suffix[i];
+  else
+    (@size / Math.pow(1024, i)).toFixed(1) + ' ' + suffix[i]
+
 mongoose.model('Bundle', BundleSchema);
 Bundle = mongoose.model('Bundle');
 
