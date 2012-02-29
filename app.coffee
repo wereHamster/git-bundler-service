@@ -145,7 +145,7 @@ app.get '/', countBundles, totalBundleSize, (req, res) ->
   }
 
 isValidSource = (source) ->
-    source.length > 10 && source.match /^[a-zA-Z0-9-:/.]*$/
+    source.length > 10 && source.match /^[a-zA-Z0-9-:/.~]*$/
 
 app.post '/bundle', (req, res) ->
   source = req.param('source')
